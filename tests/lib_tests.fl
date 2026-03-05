@@ -1,0 +1,21 @@
+/* Vector Index - Tests */
+
+#[test]
+fn test_core_creation() {
+    let core = super::Core::new(1);
+    assert_eq!(core.id, 1);
+    assert!(core.is_active());
+}
+
+#[test]
+fn test_core_disable() {
+    let mut core = super::Core::new(1);
+    core.disable();
+    assert!(!core.is_active());
+}
+
+#[test]
+fn test_initialize() {
+    let core = super::initialize();
+    assert!(core.is_active());
+}

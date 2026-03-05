@@ -1,0 +1,28 @@
+/* Vector Index - Library */
+
+pub struct Core {
+    id: u32,
+    active: bool,
+}
+
+impl Core {
+    pub fn new(id: u32) -> Self {
+        Core { id, active: true }
+    }
+    
+    pub fn enable(&mut self) {
+        self.active = true;
+    }
+    
+    pub fn disable(&mut self) {
+        self.active = false;
+    }
+    
+    pub fn is_active(&self) -> bool {
+        self.active
+    }
+}
+
+pub fn initialize() -> Core {
+    Core::new(1)
+}

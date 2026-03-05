@@ -1,0 +1,4 @@
+/* Vector Index - Module Integration */
+
+pub use crate::lib::Core;
+pub use crate::lib::initialize;
