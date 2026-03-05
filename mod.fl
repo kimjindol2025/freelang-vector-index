@@ -1,0 +1,128 @@
+// Project 9: Vector Index - Module Integration
+// Central module for vector indexing system
+// 200줄
+
+pub use vector_storage as vs;
+pub use indexing_algorithms as ia;
+pub use search_engine as se;
+pub use similarity_metrics as sm;
+pub use index_management as im;
+
+// ============================================================================
+// Unified Vector Index API
+// ============================================================================
+
+// Main API entry point
+pub struct VectorIndexSystem {
+  storage: vs::VectorStorage,
+  index: im::VectorIndex,
+  config: im::IndexConfig,
+  is_ready: bool,
+}
+
+pub fn init_vector_index_system(
+  index_type: string,
+  dimension: i32,
+  max_vectors: i32
+) -> VectorIndexSystem {
+  let config = im::IndexConfig {
+    index_type: index_type,
+    dimension: dimension,
+    max_vectors: max_vectors,
+    batch_size: 10000,
+    enable_replication: true,
+    replication_factor: 3,
+  };
+
+  let storage = vs::init_vector_storage(dimension);
+  let index = im::init_vector_index(config);
+
+  VectorIndexSystem {
+    storage: storage,
+    index: index,
+    config: config,
+    is_ready: true,
+  }
+}
+
+// Add vector to system
+pub fn add_vector_to_system(sys: VectorIndexSystem, vec: any) -> VectorIndexSystem {
+  let mut s = sys;
+  s.storage = vs::add_vector(s.storage, vec);
+  s
+}
+
+// Build index from stored vectors
+pub fn build_system_index(sys: VectorIndexSystem) -> VectorIndexSystem {
+  let mut s = sys;
+  let vectors = [];
+
+  let mut i = 0;
+  while i < s.storage.count {
+    push(vectors, vs::get_vector(s.storage, i));
+    i = i + 1;
+  }
+
+  s.index = im::build_index_batch(s.index, vectors);
+  s.is_ready = true;
+  s
+}
+
+// Search using system
+pub fn search_vector(
+  sys: VectorIndexSystem,
+  query_vec: any,
+  k: i32,
+  metric: string
+) -> se::KNNSearchResult {
+  let searcher = se::init_knn_searcher(k, metric);
+  let vectors = [];
+
+  let mut i = 0;
+  while i < sys.storage.count {
+    push(vectors, vs::get_vector(sys.storage, i));
+    i = i + 1;
+  }
+
+  se::knn_search(searcher, query_vec, vectors)
+}
+
+// Get vector by ID
+pub fn get_vector_by_id(sys: VectorIndexSystem, id: i32) -> any {
+  vs::get_vector(sys.storage, id)
+}
+
+// Apply quantization to reduce memory
+pub fn apply_quantization(sys: VectorIndexSystem, method: string) -> VectorIndexSystem {
+  let mut s = sys;
+
+  if method == "int8" {
+    s.storage = vs::quantize_int8(s.storage);
+  } else if method == "fp16" {
+    s.storage = vs::quantize_fp16(s.storage);
+  }
+
+  s
+}
+
+// Get system statistics
+pub fn get_system_stats(sys: VectorIndexSystem) -> any {
+  let stats = [
+    sys.storage.count,           // Total vectors
+    sys.storage.dimension,       // Dimension
+    sys.storage.memory_usage,    // Memory bytes
+    sys.index.metadata.build_time_ms,  // Build time
+  ];
+  stats
+}
+
+// Export module functions
+pub fn test_all_modules() -> bool {
+  let test1 = vs::test_vector_storage();
+  let test2 = ia::test_indexing_algorithms();
+  let test3 = se::test_search_engine();
+  let test4 = sm::test_similarity_metrics();
+  let test5 = im::test_index_management();
+
+  test1 && test2 && test3 && test4 && test5
+}
